@@ -7,29 +7,29 @@ import { Col, Row, Container } from "../../components/Grid";
 import { List, ListItem } from "../../components/List";
 import { Input, TextArea, FormBtn } from "../../components/Form";
 
-class Books extends Component {
+class Article extends Component {
   state = {
-    books: [],
+    article: [],
     title: "",
-    author: "",
-    synopsis: ""
+    startDate: "",
+    link: ""
   };
 
   componentDidMount() {
-    this.loadBooks();
+    this.loadArticles();
   }
 
-  loadBooks = () => {
-    API.getBooks()
+  loadArticles = () => {
+    API.getArticles()
       .then(res =>
-        this.setState({ books: res.data, title: "", author: "", synopsis: "" })
+        this.setState({ article: res, title: "", date: "", link: "" })
       )
       .catch(err => console.log(err));
   };
 
-  deleteBook = id => {
-    API.deleteBook(id)
-      .then(res => this.loadBooks())
+  deleteArticle = id => {
+    API.deleteArticle(id)
+      .then(res => this.loadArticle())
       .catch(err => console.log(err));
   };
 
@@ -42,13 +42,13 @@ class Books extends Component {
 
   handleFormSubmit = event => {
     event.preventDefault();
-    if (this.state.title && this.state.author) {
-      API.saveBook({
+    if (this.state.title && this.state.date) {
+      API.saveArticle({
         title: this.state.title,
-        author: this.state.author,
-        synopsis: this.state.synopsis
+        date: this.state.date,
+        link: this.state.link
       })
-        .then(res => this.loadBooks())
+        .then(res => this.loadArticle())
         .catch(err => console.log(err));
     }
   };
@@ -84,7 +84,7 @@ class Books extends Component {
                 disabled={!(this.state.author && this.state.title)}
                 onClick={this.handleFormSubmit}
               >
-                Submit Book
+                Submit Book / OR SEARCH
               </FormBtn>
             </form>
           </Col>
@@ -92,16 +92,16 @@ class Books extends Component {
             <Jumbotron>
               <h1>Books On My List</h1>
             </Jumbotron>
-            {this.state.books.length ? (
+            {this.state.article.length ? (
               <List>
-                {this.state.books.map(book => (
-                  <ListItem key={book._id}>
-                    <Link to={"/books/" + book._id}>
+                {this.state.article.map(article => (
+                  <ListItem key={article._id}>
+                    <Link to={"/article/" + article._id}>
                       <strong>
-                        {book.title} by {book.author}
+                        {article.title} by {article.author}
                       </strong>
                     </Link>
-                    <DeleteBtn onClick={() => this.deleteBook(book._id)} />
+                    <DeleteBtn onClick={() => this.deleteArticle(article._id)} />
                   </ListItem>
                 ))}
               </List>
@@ -115,4 +115,4 @@ class Books extends Component {
   }
 }
 
-export default Books;
+export default Article;
