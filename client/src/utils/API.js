@@ -3,7 +3,7 @@ import axios from "axios";
 export default {
   // Gets all books
   getArticles: function() {
-    return axios.get("/api/article",  { params: q });
+    return axios.get("/api/article");
   },
   // Gets the book with the given id
   getArticle: function(id) {
