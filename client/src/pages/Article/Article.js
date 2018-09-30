@@ -1,18 +1,21 @@
 import React, { Component } from "react";
 import DeleteBtn from "../../components/DeleteBtn";
+import SaveBtn from "../../components/SaveBtn";
 import Jumbotron from "../../components/Jumbotron";
 import API from "../../utils/API";
 import { Link } from "react-router-dom";
 import { Col, Row, Container } from "../../components/Grid";
 import { List, ListItem } from "../../components/List";
 import { Input, TextArea, FormBtn } from "../../components/Form";
+// import moment from "moment";
 
 class Article extends Component {
   state = {
     article: [],
-    title: "",
-    startDate: "",
-    link: ""
+    nyTimesResults: [],
+    topic: "",
+    startYear: "",
+    endYear: ""
   };
 
   componentDidMount() {
@@ -22,16 +25,16 @@ class Article extends Component {
   loadArticles = () => {
     API.getArticles()
       .then(res =>
-        this.setState({ article: res, title: "", date: "", link: "" })
+        this.setState({ article: res.data, topic: "", startYear: "", endYear: "" })
       )
       .catch(err => console.log(err));
   };
 
-  deleteArticle = id => {
-    API.deleteArticle(id)
-      .then(res => this.loadArticle())
-      .catch(err => console.log(err));
-  };
+  // deleteArticle = id => {
+  //   API.deleteArticle(id)
+  //     .then(res => this.loadArticle())
+  //     .catch(err => console.log(err));
+  // };
 
   handleInputChange = event => {
     const { name, value } = event.target;
@@ -42,77 +45,109 @@ class Article extends Component {
 
   handleFormSubmit = event => {
     event.preventDefault();
-    if (this.state.title && this.state.date) {
-      API.saveArticle({
-        title: this.state.title,
-        date: this.state.date,
-        link: this.state.link
+    if (this.state.topic && this.state.startYear && this.state.endYear) {
+      API.getArticles({
+        topic: this.state.topic,
+        startYear: this.state.startYear.format("YYYYMMDD"),
+        endYear: this.state.endYear.format("YYYYMMDD")
       })
         .then(res => this.loadArticle())
         .catch(err => console.log(err));
     }
   };
 
+  // handleSaveArticle = event => {
+  //   event.preventDefault();
+  //   if (this.state.topic && this.state.startYear && this.state.endYear) {
+  //     API.saveArticle({
+  //       title: this.state.title,
+  //       link: this.state.link
+  //     })
+  //       .then(res => this.loadArticle())
+  //       .catch(err => console.log(err));
+  //   }
+  // };
+
   render() {
     return (
       <Container fluid>
         <Row>
-          <Col size="md-6">
+          <Col size="md-8">
             <Jumbotron>
-              <h1>What Books Should I Read?</h1>
+              <h1>Search NY Times Articles</h1>
             </Jumbotron>
             <form>
               <Input
-                value={this.state.title}
+                value={this.state.topic}
                 onChange={this.handleInputChange}
-                name="title"
-                placeholder="Title (required)"
+                name="topic"
+                placeholder="Topic (required)"
               />
               <Input
-                value={this.state.author}
+                value={this.state.startYear}
                 onChange={this.handleInputChange}
-                name="author"
-                placeholder="Author (required)"
+                name="start-year"
+                placeholder="Start Year"
               />
-              <TextArea
-                value={this.state.synopsis}
+              <Input
+                value={this.state.endYear}
                 onChange={this.handleInputChange}
-                name="synopsis"
-                placeholder="Synopsis (Optional)"
+                name="end-year"
+                placeholder="End Year"
               />
               <FormBtn
-                disabled={!(this.state.author && this.state.title)}
+                disabled={!(this.state.topic || this.state.startYear || this.state.endYear)}
                 onClick={this.handleFormSubmit}
               >
-                Submit Book / OR SEARCH
+                SEARCH
               </FormBtn>
             </form>
           </Col>
-          <Col size="md-6 sm-12">
+        </Row>
+        <Row>
+          <Col size="md-8">
             <Jumbotron>
-              <h1>Books On My List</h1>
+              <h1>Search Results</h1>
             </Jumbotron>
-            {this.state.article.length ? (
-              <List>
-                {this.state.article.map(article => (
+          </Col>
+        </Row>
+        <Row>       
+          <Col size="md-12 md-offset-1">
+            <List>
+            {this.state.article.map(article => (
                   <ListItem key={article._id}>
-                    <Link to={"/article/" + article._id}>
-                      <strong>
-                        {article.title} by {article.author}
-                      </strong>
-                    </Link>
-                    <DeleteBtn onClick={() => this.deleteArticle(article._id)} />
+                    <strong>
+                      {article.topic} 
+                      <br /><a href={article.url}>{article.url}</a>                        
+                    </strong>
+                    
+                    <SaveBtn
+                      onClick={() => this.saveArticle(article.title, article.url)}                     
+                    >
+                      SAVE
+                    </SaveBtn>
                   </ListItem>
                 ))}
-              </List>
-            ) : (
-              <h3>No Results to Display</h3>
-            )}
+            </List>
+          </Col>
+        </Row>
+        <Row>
+          <Col size="md-8 offset-4">
+            <Jumbotron>
+              <h1>Saved Articles</h1>
+            </Jumbotron>
+            
+              <DeleteBtn
+                disabled={!(this.state.author && this.state.title)}
+                onClick={this.handleFormSubmit}
+              >
+                Delete
+              </DeleteBtn>
           </Col>
         </Row>
       </Container>
     );
   }
-}
+};
 
 export default Article;

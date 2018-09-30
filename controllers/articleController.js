@@ -2,9 +2,10 @@ const db = require("../models");
 
 // Defining methods for the articleController
 module.exports = {
+  
   findAll: function(req, res) {
     db.Article
-      .find("https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=b9f91d369ff59547cd47b931d8cbc56b%3A0%3A74623931", { params: { q: query } })
+      .find({req, query})
       .sort({ date: -1 })
       .then(dbModel => res.json(dbModel))
       .catch(err => res.status(422).json(err));
